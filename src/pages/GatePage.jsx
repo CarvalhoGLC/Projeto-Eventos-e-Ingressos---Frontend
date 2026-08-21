@@ -128,7 +128,7 @@ export default function GatePage() {
                 ) : (
                   events.map((ev) => (
                     <option key={ev.id} value={ev.id}>
-                      {ev.title} (ID: {ev.id})
+                      {ev.title}
                     </option>
                   ))
                 )}
