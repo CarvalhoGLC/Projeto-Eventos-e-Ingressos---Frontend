@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // { email, role, token }
   const [restoring, setRestoring] = useState(true);
 
-  // Ao carregar a página, tenta restaurar a sessão a partir do token salvo.
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEY);
     if (!token) {

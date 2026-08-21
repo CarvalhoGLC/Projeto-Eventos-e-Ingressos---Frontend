@@ -1,10 +1,5 @@
 import { QrCode } from "lucide-react";
 
-/**
- * Cartão de ingresso com canhoto destacável — o elemento visual-assinatura
- * do produto. Usado para: confirmação de reserva e consulta pelo link
- * compartilhável.
- */
 export default function TicketStub({ title, rows, code }) {
   return (
     <div className="flex w-full shadow-lg font-sans">
@@ -25,7 +20,6 @@ export default function TicketStub({ title, rows, code }) {
         </div>
       </div>
 
-      {/* costura perfurada */}
       <div className="relative w-0 bg-kraft">
         <div className="absolute inset-y-0 left-0 border-l-2 border-dashed border-[#2A2118] opacity-40" />
         <div className="absolute rounded-full bg-ink w-4 h-4 -top-2 -left-2" />

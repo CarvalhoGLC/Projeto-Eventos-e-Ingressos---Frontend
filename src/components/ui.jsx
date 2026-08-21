@@ -77,13 +77,12 @@ export function Banner({ tone, children, onClose }) {
 }
 
 export function TabLink({ active, icon: Icon, children, ...rest }) {
+  const cls = `text-sm px-4 py-2 rounded-full flex items-center gap-1.5 font-medium cursor-pointer select-none ${
+    active ? "bg-brass text-[#181008]" : "bg-ink2 text-mutedlight border border-inkline hover:border-brass"
+  }`;
+
   return (
-    <a
-      {...rest}
-      className={`text-sm px-4 py-2 rounded-full flex items-center gap-1.5 font-medium cursor-pointer select-none ${
-        active ? "bg-brass text-[#181008]" : "bg-ink2 text-mutedlight border border-inkline hover:border-brass"
-      }`}
-    >
+    <a {...rest} className={cls}>
       <Icon className="w-3.5 h-3.5" />
       {children}
     </a>
