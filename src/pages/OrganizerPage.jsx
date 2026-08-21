@@ -164,10 +164,6 @@ export default function OrganizerPage() {
 
           <div>
             <Eyebrow>Eventos publicados nesta sessão</Eyebrow>
-            <p className="text-xs mb-4 text-muted">
-              A API não expõe uma listagem pública de eventos — esta lista existe
-              só localmente, para você anotar os IDs.
-            </p>
             <div className="space-y-3">
               {events.length === 0 && (
                 <div className="text-sm rounded-md p-4 bg-ink3 text-muted">Nenhum evento criado ainda.</div>

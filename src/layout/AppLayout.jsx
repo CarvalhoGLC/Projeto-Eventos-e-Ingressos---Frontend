@@ -36,7 +36,7 @@ export default function AppLayout() {
           {user.role === "organizer" && <NavTab to="/organizer" icon={Calendar} label="Criar Evento" />}
           {user.role === "client" && <NavTab to="/client" icon={Ticket} label="Reservar Ingresso" />}
           {user.role === "gate" && <NavTab to="/gate" icon={ShieldCheck} label="Validar Entrada" />}
-          <NavTab to="/share" icon={Search} label="Consultar Ingresso" />
+          <NavTab to="/share" icon={Search} label="Consultar Eventos" />
         </nav>
 
         <Outlet />
