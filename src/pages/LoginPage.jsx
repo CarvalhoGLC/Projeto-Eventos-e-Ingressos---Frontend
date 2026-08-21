@@ -10,7 +10,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Eyebrow, Select, Banner } from "../components/ui.jsx";
+import { Select, Banner } from "../components/ui.jsx";
 
 export default function LoginPage() {
   const { user, login, register, restoring } = useAuth();
@@ -68,26 +68,25 @@ export default function LoginPage() {
       {/* Cartão do guichê */}
       <div className="relative z-10 grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl max-w-3xl w-full border border-white/5 backdrop-blur-xl bg-ink2/70 animate-fadeInUp">
         <div className="p-10 flex flex-col justify-center bg-gradient-to-br from-ink2/80 to-ink3/60">
-          <Eyebrow>Guichê Nº 1</Eyebrow>
-          <h1 className="text-3xl leading-tight mb-3 font-display font-bold text-kraft">
+          <h1 className="text-4xl leading-tight mb-4 font-display font-bold text-kraft">
             Toda entrada
             <br />
             começa aqui.
           </h1>
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted mb-8">
             Organize eventos, reserve ingressos com QR Code assinado e valide
             entradas na portaria — tudo em um único guichê.
           </p>
-          <div className="mt-8 space-y-3 text-xs text-muted">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-brass" /> Organizadores criam eventos
-            </div>
-            <div className="flex items-center gap-2">
-              <QrCode className="w-4 h-4 text-brass" /> Clientes reservam com QR único
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brass" /> Portaria valida uma única vez
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
+              <Calendar className="w-3.5 h-3.5 text-brass" /> Organizadores criam eventos
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
+              <QrCode className="w-3.5 h-3.5 text-brass" /> Clientes reservam com QR único
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-brass" /> Portaria valida uma única vez
+            </span>
           </div>
         </div>
 
