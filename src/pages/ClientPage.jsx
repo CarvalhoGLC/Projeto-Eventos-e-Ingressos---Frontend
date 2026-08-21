@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api.js";
@@ -11,6 +11,10 @@ export default function ClientPage() {
   // Controle de abas: 'reserve' ou 'lookup'
   const [activeTab, setActiveTab] = useState("reserve");
 
+  // Estado dos eventos cadastrados
+  const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
   // Estado do formulário de reserva
   const [form, setForm] = useState({ event_id: "", seat_number: "", pay: true });
   const [ticket, setTicket] = useState(null);
@@ -22,9 +26,35 @@ export default function ClientPage() {
   const [searchedTicket, setSearchedTicket] = useState(null);
   const [searchBusy, setSearchBusy] = useState(false);
 
+  // Carrega os eventos cadastrados ao montar a tela
+  useEffect(() => {
+    async function loadEvents() {
+      setLoadingEvents(true);
+      try {
+        const data = await api.getEvents(user?.token);
+        const eventList = Array.isArray(data) ? data : data?.events || [];
+        setEvents(eventList);
+        if (eventList.length > 0) {
+          setForm((prev) => ({ ...prev, event_id: eventList[0].id }));
+        }
+      } catch (err) {
+        setBanner({ tone: "error", text: "Não foi possível carregar a lista de eventos." });
+      } finally {
+        setLoadingEvents(false);
+      }
+    }
+
+    loadEvents();
+  }, [user]);
+
   // 1. Fluxo de Reserva
   async function handleBooking(e) {
     e.preventDefault();
+    if (!form.event_id) {
+      setBanner({ tone: "error", text: "Selecione um evento válido." });
+      return;
+    }
+
     setBusy(true);
     try {
       const data = await api.bookTicket(user.token, {
@@ -35,11 +65,9 @@ export default function ClientPage() {
       setTicket(data);
       setBanner({ tone: "ok", text: "Ingresso reservado com sucesso! Redirecionando para consulta..." });
       
-      // Extrai apenas o token do share_link (ex: /tickets/share/UUID -> UUID)
       const token = data.share_link ? data.share_link.split("/").pop() : "";
       setSearchToken(token);
 
-      // Alterna automaticamente para a aba "Consultar Ingresso"
       setTimeout(() => {
         setActiveTab("lookup");
         if (token) {
@@ -56,13 +84,12 @@ export default function ClientPage() {
 
   // 2. Fluxo de Busca/Consulta do Ingresso
   async function fetchSharedTicket(tokenToFetch) {
-    // Trata caso o usuário cole a URL completa ou só o token
     const cleanToken = tokenToFetch.includes("/") ? tokenToFetch.split("/").pop() : tokenToFetch;
     if (!cleanToken) return;
 
     setSearchBusy(true);
     try {
-      const data = await api.getSharedTicket(cleanToken);
+      const data = await api.sharedTicket(cleanToken);
       setSearchedTicket(data);
     } catch (err) {
       setBanner({ tone: "error", text: "Ingresso não encontrado ou token inválido." });
@@ -85,7 +112,7 @@ export default function ClientPage() {
         </Banner>
       )}
 
-      {/* Navegação de Abas Superior conforme a Interface */}
+      {/* Navegação de Abas Superior */}
       <div className="flex gap-2 justify-center mb-8">
         <button
           onClick={() => setActiveTab("reserve")}
@@ -117,15 +144,28 @@ export default function ClientPage() {
             <h2 className="text-xl mb-5 font-display font-semibold text-slate-100">Reservar ingresso</h2>
 
             <form onSubmit={handleBooking}>
-              <Field label="ID do evento">
-                <TextInput
-                  type="number"
+              <Field label="Selecione o evento">
+                <select
                   required
+                  disabled={loadingEvents || events.length === 0}
                   value={form.event_id}
                   onChange={(e) => setForm({ ...form, event_id: e.target.value })}
-                  placeholder="1"
-                />
+                  className="w-full rounded-md px-3 py-2 bg-ink3 text-slate-100 border border-inkline focus:outline-none focus:border-brass text-sm"
+                >
+                  {loadingEvents ? (
+                    <option value="">Carregando eventos...</option>
+                  ) : events.length === 0 ? (
+                    <option value="">Nenhum evento disponível</option>
+                  ) : (
+                    events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.title} ({ev.location}) - R$ {Number(ev.price || 0).toFixed(2)}
+                      </option>
+                    ))
+                  )}
+                </select>
               </Field>
+
               <Field label="Assento">
                 <TextInput
                   required
@@ -142,7 +182,7 @@ export default function ClientPage() {
                 />
                 Simular pagamento aprovado
               </label>
-              <Button type="submit" loading={busy} className="w-full">
+              <Button type="submit" loading={busy} disabled={events.length === 0} className="w-full">
                 Confirmar reserva
               </Button>
             </form>
