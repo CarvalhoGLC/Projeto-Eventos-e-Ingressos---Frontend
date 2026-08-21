@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api.js";
-import { Eyebrow, Field, TextInput, TextArea, Button, Banner } from "../components/ui.jsx";
+import { Eyebrow, Field, TextArea, Button, Banner } from "../components/ui.jsx";
 import StampResult from "../components/StampResult.jsx";
 
 export default function GatePage() {
   const { user } = useAuth();
   const [form, setForm] = useState({ qr_payload: "", gate_event_id: "" });
+  const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState(null);
@@ -16,10 +18,36 @@ export default function GatePage() {
   // Referência para o scanner não duplicar re-renders
   const scannerRef = useRef(null);
 
+  // Busca os eventos da API ao carregar o componente
+  useEffect(() => {
+    async function loadEvents() {
+      setLoadingEvents(true);
+      try {
+        const data = await api.getEvents(user.token);
+        // Garante que o retorno seja uma lista válida
+        const eventList = Array.isArray(data) ? data : data?.events || [];
+        setEvents(eventList);
+
+        // Define o primeiro evento como selecionado por padrão, se existir
+        if (eventList.length > 0) {
+          setForm((prev) => ({ ...prev, gate_event_id: eventList[0].id }));
+        }
+      } catch (err) {
+        setBanner({ tone: "error", text: "Erro ao carregar a lista de eventos." });
+      } finally {
+        setLoadingEvents(false);
+      }
+    }
+
+    if (user?.token) {
+      loadEvents();
+    }
+  }, [user]);
+
   // Executa a validação na API
   async function validatePayload(payload, eventId) {
     if (!eventId) {
-      setBanner({ tone: "error", text: "Informe o ID do evento na portaria antes de escanear." });
+      setBanner({ tone: "error", text: "Selecione um evento na portaria antes de escanear." });
       return;
     }
 
@@ -53,12 +81,9 @@ export default function GatePage() {
         (decodedText) => {
           setForm((prev) => ({ ...prev, qr_payload: decodedText }));
           validatePayload(decodedText, form.gate_event_id);
-          // Opcional: Desliga a câmera após a leitura com sucesso
           setScanning(false);
         },
-        (error) => {
-          // Ignora erros contínuos de busca de quadro da câmera
-        }
+        () => {}
       );
     } else {
       if (scannerRef.current) {
@@ -86,16 +111,28 @@ export default function GatePage() {
           <Eyebrow>Checagem</Eyebrow>
           <h2 className="text-xl mb-5 font-display font-semibold text-slate-100">Validar entrada</h2>
 
-          {/* Campo obrigatório do evento para a leitura */}
+          {/* Seleção de Eventos Cadastrados */}
           <div className="mb-4">
-            <Field label="ID do evento na portaria">
-              <TextInput
-                type="number"
+            <Field label="Selecione o Evento na Portaria">
+              <select
                 required
                 value={form.gate_event_id}
                 onChange={(e) => setForm({ ...form, gate_event_id: e.target.value })}
-                placeholder="1"
-              />
+                disabled={loadingEvents}
+                className="w-full rounded-md px-3 py-2 bg-slate-800 text-slate-100 border border-slate-700 focus:outline-none focus:border-amber-500 text-sm"
+              >
+                {loadingEvents ? (
+                  <option value="">Carregando eventos...</option>
+                ) : events.length === 0 ? (
+                  <option value="">Nenhum evento encontrado</option>
+                ) : (
+                  events.map((ev) => (
+                    <option key={ev.id} value={ev.id}>
+                      {ev.title} (ID: {ev.id})
+                    </option>
+                  ))
+                )}
+              </select>
             </Field>
           </div>
 
@@ -122,7 +159,7 @@ export default function GatePage() {
             <span className="bg-ink2 px-2">OU DIGITAÇÃO MANUAL</span>
           </div>
 
-          {/* Formulário Manual Existente */}
+          {/* Formulário Manual */}
           <form onSubmit={handleManualValidate}>
             <Field label="Payload do QR Code">
               <TextArea
