@@ -49,6 +49,8 @@ export const api = {
   createEvent: (token, event) =>
     request("/events", { method: "POST", token, json: event }),
 
+  getEvents: (token) => request("/events", { method: "GET", token }),
+
   searchMovies: (query) => request("/external/movies", { query: { query } }),
 
   bookTicket: (token, booking) =>

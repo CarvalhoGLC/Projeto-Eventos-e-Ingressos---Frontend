@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, Calendar, CircleDollarSign, Search } from "lucide-react";
+import { MapPin, Calendar, CircleDollarSign } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api.js";
 import { Eyebrow, Banner } from "../components/ui.jsx";
@@ -18,7 +18,7 @@ export default function ShareLookupPage() {
         const eventList = Array.isArray(data) ? data : data?.events || [];
         setEvents(eventList);
       } catch (err) {
-        setBanner({ tone: "error", text: err.message || "Erro ao carregar os eventos." });
+        setBanner({ tone: "error", text: err.message || "Não foi possível carregar os eventos." });
       } finally {
         setLoading(false);
       }
