@@ -9,8 +9,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // { email, role, token }
   const [restoring, setRestoring] = useState(true);
 
+  // Ao carregar a página, tenta restaurar a sessão — primeiro do
+  // localStorage (login com "lembrar de mim"), depois do sessionStorage
+  // (login sem "lembrar de mim", válido só nesta aba).
   useEffect(() => {
-    const token = localStorage.getItem(STORAGE_KEY);
+    const token = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
     if (!token) {
       setRestoring(false);
       return;
@@ -18,14 +21,22 @@ export function AuthProvider({ children }) {
     api
       .me(token)
       .then((me) => setUser({ email: me.email, role: me.role, token }))
-      .catch(() => localStorage.removeItem(STORAGE_KEY))
+      .catch(() => {
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
+      })
       .finally(() => setRestoring(false));
   }, []);
 
-  async function login(email, password) {
+  async function login(email, password, remember = true) {
     const { access_token } = await api.login(email, password);
     const me = await api.me(access_token);
-    localStorage.setItem(STORAGE_KEY, access_token);
+
+    // "Lembrar de mim" marcado: sobrevive a fechar o navegador (localStorage).
+    // Desmarcado: some ao fechar a aba (sessionStorage).
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem(STORAGE_KEY, access_token);
+
     setUser({ email: me.email, role: me.role, token: access_token });
   }
 
@@ -35,6 +46,7 @@ export function AuthProvider({ children }) {
 
   function logout() {
     localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     setUser(null);
   }
 

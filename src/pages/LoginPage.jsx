@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { LogIn, UserPlus, ChevronRight, Calendar, QrCode, ShieldCheck } from "lucide-react";
+import {
+  ChevronRight,
+  Calendar,
+  QrCode,
+  ShieldCheck,
+  User,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Eyebrow, Field, TextInput, Select, Button, Banner } from "../components/ui.jsx";
+import { Eyebrow, Select, Banner } from "../components/ui.jsx";
 
 export default function LoginPage() {
   const { user, login, register, restoring } = useAuth();
@@ -12,6 +20,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("client");
+  const [remember, setRemember] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,7 +40,7 @@ export default function LoginPage() {
         setBusy(false);
         return;
       }
-      await login(email, password);
+      await login(email, password, remember);
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -38,6 +48,8 @@ export default function LoginPage() {
       setBusy(false);
     }
   }
+
+  const isLogin = mode === "login";
 
   return (
     <div className="relative min-h-screen w-full bg-ink flex items-center justify-center px-6 overflow-hidden">
@@ -79,63 +91,116 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="p-10 bg-ink/60">
-          <div className="flex gap-2 mb-6">
-            <button
-              onClick={() => setMode("login")}
-              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 transition-colors ${
-                mode === "login" ? "bg-brass text-[#181008]" : "bg-ink3/80 text-mutedlight hover:bg-ink3"
-              }`}
-            >
-              <LogIn className="w-4 h-4" /> Entrar
-            </button>
-            <button
-              onClick={() => setMode("register")}
-              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 transition-colors ${
-                mode === "register" ? "bg-brass text-[#181008]" : "bg-ink3/80 text-mutedlight hover:bg-ink3"
-              }`}
-            >
-              <UserPlus className="w-4 h-4" /> Cadastrar
-            </button>
-          </div>
+        {/* Formulário — estilo cartão de vidro, inputs em pílula com ícone */}
+        <div className="p-10 bg-ink/60 flex flex-col justify-center">
+          <h2 className="text-2xl font-display font-bold text-slate-100 mb-1">
+            {isLogin ? "Entrar" : "Criar conta"}
+          </h2>
+          <p className="text-sm text-muted mb-6">
+            {isLogin
+              ? "Bem-vindo de volta — acesse sua conta."
+              : "Preencha os dados para começar."}
+          </p>
 
           {error && <Banner tone="error" onClose={() => setError("")}>{error}</Banner>}
 
           <form onSubmit={handleSubmit}>
-            <Field label="E-mail">
-              <TextInput
+            {/* E-mail — pílula de vidro com ícone à direita */}
+            <div className="relative mb-4">
+              <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="voce@exemplo.com"
+                placeholder="E-mail"
+                className="w-full rounded-full pl-5 pr-12 py-3 text-sm bg-white/5 border border-white/10 text-slate-100 placeholder:text-mutedlight outline-none focus:border-brass transition-colors backdrop-blur-sm"
               />
-            </Field>
-            <Field label="Senha">
-              <TextInput
-                type="password"
+              <User className="w-4 h-4 text-mutedlight absolute right-5 top-1/2 -translate-y-1/2" />
+            </div>
+
+            {/* Senha — pílula de vidro com alternância de visibilidade */}
+            <div className="relative mb-4">
+              <input
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Senha"
+                className="w-full rounded-full pl-5 pr-12 py-3 text-sm bg-white/5 border border-white/10 text-slate-100 placeholder:text-mutedlight outline-none focus:border-brass transition-colors backdrop-blur-sm"
               />
-            </Field>
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-mutedlight hover:text-brass"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
 
             {mode === "register" && (
-              <Field label="Papel">
+              <div className="mb-4">
+                <span
+                  className="block text-xs mb-1.5 uppercase tracking-wide text-mutedlight"
+                  style={{ letterSpacing: "0.08em" }}
+                >
+                  Papel
+                </span>
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
                   <option value="organizer">Organizador</option>
                   <option value="client">Cliente</option>
                   <option value="gate">Portaria</option>
                 </Select>
-              </Field>
+              </div>
             )}
 
-            <Button type="submit" loading={busy} className="w-full mt-2">
-              {mode === "login" ? "Entrar" : "Criar conta"}
+            {isLogin && (
+              <label className="flex items-center gap-2 mb-6 text-sm text-mutedlight cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="accent-brass w-4 h-4"
+                />
+                Lembrar de mim
+              </label>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full rounded-full py-3 text-sm font-semibold text-[#181008] bg-gradient-to-r from-brass to-brassdark hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-brass/20"
+            >
+              {isLogin ? "Entrar" : "Criar conta"}
               <ChevronRight className="w-4 h-4" />
-            </Button>
+            </button>
           </form>
+
+          <p className="text-center text-sm text-mutedlight mt-6">
+            {isLogin ? (
+              <>
+                Não tem conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("register")}
+                  className="text-brass font-semibold hover:underline"
+                >
+                  Cadastre-se
+                </button>
+              </>
+            ) : (
+              <>
+                Já tem conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className="text-brass font-semibold hover:underline"
+                >
+                  Entrar
+                </button>
+              </>
+            )}
+          </p>
         </div>
       </div>
     </div>
