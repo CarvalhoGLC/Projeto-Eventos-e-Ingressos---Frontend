@@ -28,9 +28,19 @@ module.exports = {
           "60%": { transform: "scale(1.08) rotate(-8deg)", opacity: 1 },
           "100%": { transform: "scale(1) rotate(-8deg)", opacity: 1 },
         },
+        spotlightSweep: {
+          "0%, 100%": { opacity: "0.25", transform: "translateX(-50%) rotate(0deg)" },
+          "50%": { opacity: "0.45", transform: "translateX(-50%) rotate(6deg)" },
+        },
+        fadeInUp: {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         stampPop: "stampPop 0.4s ease-out",
+        spotlightSweep: "spotlightSweep 8s ease-in-out infinite",
+        fadeInUp: "fadeInUp 0.6s ease-out",
       },
     },
   },

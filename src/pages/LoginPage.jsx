@@ -40,9 +40,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-ink flex items-center justify-center px-6">
-      <div className="grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl max-w-3xl w-full">
-        <div className="p-10 flex flex-col justify-center bg-ink2">
+    <div className="relative min-h-screen w-full bg-ink flex items-center justify-center px-6 overflow-hidden">
+      {/* Fundo: foto de show + gradiente escuro para legibilidade */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/login-bg.avif')" }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/90 via-ink/80 to-ink" />
+      <div className="pointer-events-none absolute inset-0 bg-ink/40" />
+
+      {/* Bokeh sutil, por cima da foto */}
+      <div className="pointer-events-none absolute top-16 left-[12%] w-40 h-40 rounded-full bg-brass/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-24 right-[15%] w-56 h-56 rounded-full bg-stampred/10 blur-3xl" />
+
+      {/* Cartão do guichê */}
+      <div className="relative z-10 grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl max-w-3xl w-full border border-white/5 backdrop-blur-xl bg-ink2/70 animate-fadeInUp">
+        <div className="p-10 flex flex-col justify-center bg-gradient-to-br from-ink2/80 to-ink3/60">
           <Eyebrow>Guichê Nº 1</Eyebrow>
           <h1 className="text-3xl leading-tight mb-3 font-display font-bold text-kraft">
             Toda entrada
@@ -66,20 +79,20 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="p-10 bg-ink">
+        <div className="p-10 bg-ink/60">
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setMode("login")}
-              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 ${
-                mode === "login" ? "bg-brass text-[#181008]" : "bg-ink3 text-mutedlight"
+              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                mode === "login" ? "bg-brass text-[#181008]" : "bg-ink3/80 text-mutedlight hover:bg-ink3"
               }`}
             >
               <LogIn className="w-4 h-4" /> Entrar
             </button>
             <button
               onClick={() => setMode("register")}
-              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 ${
-                mode === "register" ? "bg-brass text-[#181008]" : "bg-ink3 text-mutedlight"
+              className={`flex-1 text-sm py-2 rounded-md font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                mode === "register" ? "bg-brass text-[#181008]" : "bg-ink3/80 text-mutedlight hover:bg-ink3"
               }`}
             >
               <UserPlus className="w-4 h-4" /> Cadastrar
