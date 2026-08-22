@@ -65,8 +65,10 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute top-16 left-[12%] w-40 h-40 rounded-full bg-brass/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-24 right-[15%] w-56 h-56 rounded-full bg-stampred/10 blur-3xl" />
 
-      {/* Cartão do guichê */}
+      {/* Cartão principal do login/registro */}
       <div className="relative z-10 grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-2xl max-w-3xl w-full border border-white/5 backdrop-blur-xl bg-ink2/70 animate-fadeInUp">
+        
+        {/* Painel Esquerdo: Texto Institucional */}
         <div className="p-10 flex flex-col justify-center bg-gradient-to-br from-ink2/80 to-ink3/60">
           <h1 className="text-4xl leading-tight mb-4 font-display font-bold text-kraft">
             Toda entrada
@@ -77,20 +79,20 @@ export default function LoginPage() {
             Organize eventos, reserve ingressos com QR Code assinado e valide
             entradas na portaria — tudo em um único guichê.
           </p>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
-              <Calendar className="w-3.5 h-3.5 text-brass" /> Organizadores criam eventos
+          <div className="flex flex-col gap-2.5">
+            <span className="inline-flex items-center gap-2 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3.5 py-2">
+              <Calendar className="w-3.5 h-3.5 text-brass shrink-0" /> Organizadores criam eventos
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
-              <QrCode className="w-3.5 h-3.5 text-brass" /> Clientes reservam com QR único
+            <span className="inline-flex items-center gap-2 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3.5 py-2">
+              <QrCode className="w-3.5 h-3.5 text-brass shrink-0" /> Clientes reservam com QR único
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3 py-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-brass" /> Portaria valida uma única vez
+            <span className="inline-flex items-center gap-2 text-xs text-mutedlight bg-ink3/60 border border-white/5 rounded-full px-3.5 py-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-brass shrink-0" /> Portaria valida uma única vez
             </span>
           </div>
         </div>
 
-        {/* Formulário — estilo cartão de vidro, inputs em pílula com ícone */}
+        {/* Painel Direito: Formulário de Autenticação */}
         <div className="p-10 bg-ink/60 flex flex-col justify-center">
           <h2 className="text-2xl font-display font-bold text-slate-100 mb-1">
             {isLogin ? "Entrar" : "Criar conta"}
@@ -104,7 +106,7 @@ export default function LoginPage() {
           {error && <Banner tone="error" onClose={() => setError("")}>{error}</Banner>}
 
           <form onSubmit={handleSubmit}>
-            {/* E-mail — pílula de vidro com ícone à direita */}
+            {/* Campo de E-mail */}
             <div className="relative mb-4">
               <input
                 type="email"
@@ -117,7 +119,7 @@ export default function LoginPage() {
               <User className="w-4 h-4 text-mutedlight absolute right-5 top-1/2 -translate-y-1/2" />
             </div>
 
-            {/* Senha — pílula de vidro com alternância de visibilidade */}
+            {/* Campo de Senha */}
             <div className="relative mb-4">
               <input
                 type={showPassword ? "text" : "password"}
