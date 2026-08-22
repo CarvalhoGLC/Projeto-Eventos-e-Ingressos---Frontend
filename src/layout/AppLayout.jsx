@@ -21,9 +21,8 @@ export default function AppLayout() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden md:inline text-[11px] font-mono text-muted">{API_BASE}</span>
           <span className="text-xs px-2.5 py-1 rounded-full bg-ink3 text-mutedlight">
-            {ROLE_LABEL[user.role]} · {user.email}
+            {ROLE_LABEL[user.role]}
           </span>
           <button onClick={logout} className="text-xs flex items-center gap-1 text-mutedlight hover:text-brass">
             <LogOut className="w-3.5 h-3.5" /> Sair

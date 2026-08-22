@@ -49,7 +49,7 @@ export default function OrganizerPage() {
 
   return (
     <div className="relative min-h-screen w-full bg-ink p-6 rounded-2xl overflow-hidden">
-      {/* Imagem de Fundo (Mesma do Login) + Gradiente Escuro */}
+      {/* Imagem de Fundo de Login + Gradiente Escuro */}
       <div
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-25"
         style={{ backgroundImage: "url('/login-bg.avif')" }}
@@ -58,13 +58,6 @@ export default function OrganizerPage() {
 
       {/* Conteúdo Relativo sobre o Fundo */}
       <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Badge do Usuário Exibindo Apenas 'Organizador' */}
-        <div className="flex justify-end mb-6">
-          <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800/80 text-slate-100 border border-slate-700 backdrop-blur-md">
-            Organizador
-          </span>
-        </div>
-
         {banner && (
           <Banner tone={banner.tone} onClose={() => setBanner(null)}>
             {banner.text}
