@@ -12,7 +12,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Select, Banner } from "../components/ui.jsx";
+import { Eyebrow, Select, Banner } from "../components/ui.jsx";
 
 // Lista de imagens para o carrossel 3D
 const CAROUSEL_IMAGES = [
@@ -110,13 +110,13 @@ export default function LoginPage() {
 
         <nav className="hidden md:flex items-center gap-8 text-sm text-mutedlight">
           <button onClick={() => setShowAuthModal(true)} className="hover:text-brass transition-colors">
-            Criar Eventos
+            Para Organizadores
           </button>
           <button onClick={() => setShowAuthModal(true)} className="hover:text-brass transition-colors">
-            Reservar Ingresso
+            Para Clientes
           </button>
           <button onClick={() => setShowAuthModal(true)} className="hover:text-brass transition-colors">
-            Validar Entrada
+            Para a Portaria
           </button>
         </nav>
 
@@ -134,7 +134,8 @@ export default function LoginPage() {
       {/* 2. CENTRO: HERO SECTION */}
       <main className="relative z-10 max-w-5xl w-full mx-auto text-center my-auto py-4 flex flex-col items-center">
         {/* Título Destacado */}
-        <h1 className="text-4xl md:text-6xl font-display font-bold text-kraft max-w-2xl leading-tight mb-4">
+        <Eyebrow>Bilheteria Digital</Eyebrow>
+        <h1 className="text-4xl md:text-6xl font-display font-bold text-kraft max-w-2xl leading-[1.05] mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
           Toda entrada começa aqui.
         </h1>
 
@@ -199,13 +200,21 @@ export default function LoginPage() {
 
                   {/* Título interno do card */}
                   {isCenter && (
-                    <div className="absolute bottom-5 left-6 z-30 text-left animate-fadeIn">
-                      <span className="text-xs uppercase tracking-widest text-brass font-semibold">
-                        Destaque
-                      </span>
-                      <h3 className="text-lg md:text-xl font-bold text-slate-100 drop-shadow-md">
-                        {image.title}
-                      </h3>
+                    <div className="absolute bottom-0 left-0 right-0 z-30 animate-fadeIn">
+                      {/* Costura perfurada, no mesmo espírito do canhoto de ingresso */}
+                      <div className="relative h-3 flex items-center px-4">
+                        <div className="w-full border-t-2 border-dashed border-kraft/50" />
+                        <div className="absolute -left-1.5 w-3 h-3 rounded-full bg-ink" />
+                        <div className="absolute -right-1.5 w-3 h-3 rounded-full bg-ink" />
+                      </div>
+                      <div className="text-left px-6 pb-5 pt-2">
+                        <span className="text-xs uppercase tracking-widest text-brass font-semibold">
+                          Destaque
+                        </span>
+                        <h3 className="text-lg md:text-xl font-bold text-slate-100 drop-shadow-md">
+                          {image.title}
+                        </h3>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -220,13 +229,13 @@ export default function LoginPage() {
           {/* Botões do Carrossel 3D */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 z-50 p-3 rounded-full bg-ink/70 border border-white/10 text-slate-100 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all hover:bg-brass hover:text-[#181008] shadow-lg"
+            className="absolute left-2 z-50 p-3 rounded-full bg-ink/70 border border-white/10 text-slate-100 backdrop-blur-md opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-brass hover:text-[#181008] shadow-lg"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 z-50 p-3 rounded-full bg-ink/70 border border-white/10 text-slate-100 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all hover:bg-brass hover:text-[#181008] shadow-lg"
+            className="absolute right-2 z-50 p-3 rounded-full bg-ink/70 border border-white/10 text-slate-100 backdrop-blur-md opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-brass hover:text-[#181008] shadow-lg"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
@@ -268,7 +277,7 @@ export default function LoginPage() {
 
       {/* 3. RODAPÉ DO HERO: CARDS DE DESTAQUE */}
       <footer className="relative z-10 max-w-5xl w-full mx-auto grid md:grid-cols-3 gap-4 pt-4">
-        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4">
+        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 transition-all hover:border-brass/40 hover:-translate-y-0.5">
           <div className="p-3 rounded-xl bg-ink3/80 text-brass">
             <Calendar className="w-6 h-6" />
           </div>
@@ -278,7 +287,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4">
+        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 transition-all hover:border-brass/40 hover:-translate-y-0.5">
           <div className="p-3 rounded-xl bg-ink3/80 text-brass">
             <QrCode className="w-6 h-6" />
           </div>
@@ -288,7 +297,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4">
+        <div className="bg-ink2/70 border border-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 transition-all hover:border-brass/40 hover:-translate-y-0.5">
           <div className="p-3 rounded-xl bg-ink3/80 text-brass">
             <ShieldCheck className="w-6 h-6" />
           </div>
