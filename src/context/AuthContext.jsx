@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 const STORAGE_KEY = "bilheteria_token";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { email, role, token }
+  const [user, setUser] = useState(null); // { id, email, role, token }
   const [restoring, setRestoring] = useState(true);
 
   // Ao carregar a página, tenta restaurar a sessão — primeiro do
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     }
     api
       .me(token)
-      .then((me) => setUser({ email: me.email, role: me.role, token }))
+      .then((me) => setUser({ id: me.id, email: me.email, role: me.role, token }))
       .catch(() => {
         localStorage.removeItem(STORAGE_KEY);
         sessionStorage.removeItem(STORAGE_KEY);
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem(STORAGE_KEY, access_token);
 
-    setUser({ email: me.email, role: me.role, token: access_token });
+    setUser({ id: me.id, email: me.email, role: me.role, token: access_token });
   }
 
   async function register(email, password, role) {

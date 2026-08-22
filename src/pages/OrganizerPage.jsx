@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Film, MapPin, CircleDollarSign } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Film, MapPin, CircleDollarSign, Pencil, Trash2, X, Check } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api.js";
 import { Eyebrow, Field, TextInput, Button, Banner } from "../components/ui.jsx";
@@ -8,10 +8,36 @@ export default function OrganizerPage() {
   const { user } = useAuth();
   const [form, setForm] = useState({ title: "", location: "", date: "", price: "" });
   const [events, setEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const [movieQuery, setMovieQuery] = useState("");
   const [movieResults, setMovieResults] = useState([]);
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState(null);
+
+  // Edição inline
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ title: "", location: "", date: "", price: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  async function loadMyEvents() {
+    setLoadingEvents(true);
+    try {
+      const data = await api.getEvents(user.token);
+      const all = Array.isArray(data) ? data : data?.events || [];
+      // A API devolve todos os eventos publicados — filtramos só os deste organizador
+      setEvents(all.filter((ev) => ev.organizer_id === user.id));
+    } catch (err) {
+      setBanner({ tone: "error", text: "Não foi possível carregar seus eventos." });
+    } finally {
+      setLoadingEvents(false);
+    }
+  }
+
+  useEffect(() => {
+    if (user?.token) loadMyEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   async function handleCreateEvent(e) {
     e.preventDefault();
@@ -44,6 +70,55 @@ export default function OrganizerPage() {
       setBanner({ tone: "error", text: err.message });
     } finally {
       setBusy(false);
+    }
+  }
+
+  function startEdit(ev) {
+    setEditingId(ev.id);
+    setEditForm({
+      title: ev.title,
+      location: ev.location,
+      date: ev.date || "",
+      price: String(ev.price ?? ""),
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function saveEdit(eventId) {
+    setSavingEdit(true);
+    try {
+      const updated = await api.updateEvent(user.token, eventId, {
+        title: editForm.title,
+        location: editForm.location,
+        date: editForm.date,
+        price: parseFloat(editForm.price || "0"),
+      });
+      setEvents((prev) => prev.map((ev) => (ev.id === eventId ? updated : ev)));
+      setEditingId(null);
+      setBanner({ tone: "ok", text: "Evento atualizado com sucesso." });
+    } catch (err) {
+      setBanner({ tone: "error", text: err.message });
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDelete(eventId) {
+    if (!window.confirm("Tem certeza que quer excluir este evento? Essa ação não pode ser desfeita.")) {
+      return;
+    }
+    setDeletingId(eventId);
+    try {
+      await api.deleteEvent(user.token, eventId);
+      setEvents((prev) => prev.filter((ev) => ev.id !== eventId));
+      setBanner({ tone: "ok", text: "Evento excluído." });
+    } catch (err) {
+      setBanner({ tone: "error", text: err.message });
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -133,28 +208,107 @@ export default function OrganizerPage() {
         </div>
 
         <div>
-          <Eyebrow>Eventos publicados nesta sessão</Eyebrow>
-          <div className="space-y-3">
-            {events.length === 0 && (
-              <div className="text-sm rounded-md p-4 bg-ink3/80 backdrop-blur-md text-muted border border-white/5">
-                Nenhum evento criado ainda.
-              </div>
-            )}
-            {events.map((ev) => (
-              <div key={ev.id} className="rounded-md p-4 flex justify-between items-start bg-ink2/80 backdrop-blur-md border border-inkline">
-                <div>
-                  <div className="text-sm font-semibold text-slate-100">{ev.title}</div>
-                  <div className="text-xs mt-1 flex items-center gap-1 text-muted">
-                    <MapPin className="w-3 h-3" /> {ev.location} · {ev.date}
-                  </div>
-                  <div className="text-xs mt-1 flex items-center gap-1 text-muted">
-                    <CircleDollarSign className="w-3 h-3" /> R$ {Number(ev.price).toFixed(2)}
-                  </div>
+          <Eyebrow>Meus eventos</Eyebrow>
+
+          {loadingEvents ? (
+            <div className="text-sm rounded-md p-4 bg-ink3/80 backdrop-blur-md text-muted border border-white/5">
+              Carregando seus eventos...
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {events.length === 0 && (
+                <div className="text-sm rounded-md p-4 bg-ink3/80 backdrop-blur-md text-muted border border-white/5">
+                  Você ainda não criou nenhum evento.
                 </div>
-                <span className="text-[10px] px-2 py-1 rounded-full bg-ink3 text-brass font-mono">ID {ev.id}</span>
-              </div>
-            ))}
-          </div>
+              )}
+
+              {events.map((ev) =>
+                editingId === ev.id ? (
+                  // ---- Modo edição ----
+                  <div
+                    key={ev.id}
+                    className="rounded-md p-4 bg-ink2/80 backdrop-blur-md border border-brass space-y-2"
+                  >
+                    <TextInput
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                      placeholder="Título"
+                    />
+                    <TextInput
+                      value={editForm.location}
+                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                      placeholder="Local"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <TextInput
+                        type="date"
+                        value={editForm.date}
+                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                      />
+                      <TextInput
+                        type="number"
+                        step="0.01"
+                        value={editForm.price}
+                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                        placeholder="Preço"
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <Button
+                        type="button"
+                        loading={savingEdit}
+                        onClick={() => saveEdit(ev.id)}
+                        className="flex-1"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Salvar
+                      </Button>
+                      <Button type="button" variant="ghost" onClick={cancelEdit} className="flex-1">
+                        <X className="w-3.5 h-3.5" /> Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  // ---- Modo visualização ----
+                  <div
+                    key={ev.id}
+                    className="rounded-md p-4 flex justify-between items-start bg-ink2/80 backdrop-blur-md border border-inkline"
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-slate-100">{ev.title}</div>
+                      <div className="text-xs mt-1 flex items-center gap-1 text-muted">
+                        <MapPin className="w-3 h-3" /> {ev.location} · {ev.date}
+                      </div>
+                      <div className="text-xs mt-1 flex items-center gap-1 text-muted">
+                        <CircleDollarSign className="w-3 h-3" /> R$ {Number(ev.price).toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-ink3 text-brass font-mono">
+                        ID {ev.id}
+                      </span>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => startEdit(ev)}
+                          className="p-1.5 rounded text-mutedlight hover:text-brass hover:bg-ink3"
+                          title="Editar"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(ev.id)}
+                          disabled={deletingId === ev.id}
+                          className="p-1.5 rounded text-mutedlight hover:text-stampred hover:bg-ink3 disabled:opacity-50"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

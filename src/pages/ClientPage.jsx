@@ -279,8 +279,7 @@ export default function ClientPage() {
                       : `Selecionados: ${selectedSeats.join(", ")}`}
                   </p>
                   <p className="text-[10px] text-muted mt-1">
-                    O mapa não sabe quais assentos já foram vendidos — se algum
-                    já estiver ocupado, o erro aparece só ao confirmar.
+                    Caso algum lugar esteja ocupado, aparecerá erro ao confirmar.
                   </p>
                 </div>
               ) : (

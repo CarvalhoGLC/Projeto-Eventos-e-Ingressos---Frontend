@@ -25,7 +25,7 @@ async function request(path, { method = "GET", json, form, token, query } = {}) 
   try {
     data = await res.json();
   } catch {
-    /* resposta sem corpo JSON */
+    /* resposta sem corpo JSON (ex.: 204 No Content) */
   }
 
   if (!res.ok) {
@@ -50,6 +50,12 @@ export const api = {
     request("/events", { method: "POST", token, json: event }),
 
   getEvents: (token) => request("/events", { method: "GET", token }),
+
+  updateEvent: (token, eventId, updates) =>
+    request(`/events/${eventId}`, { method: "PUT", token, json: updates }),
+
+  deleteEvent: (token, eventId) =>
+    request(`/events/${eventId}`, { method: "DELETE", token }),
 
   searchMovies: (query) => request("/external/movies", { query: { query } }),
 
