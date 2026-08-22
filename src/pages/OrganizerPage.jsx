@@ -48,122 +48,112 @@ export default function OrganizerPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-ink p-6 rounded-2xl overflow-hidden">
-      {/* Imagem de Fundo de Login + Gradiente Escuro */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-25"
-        style={{ backgroundImage: "url('/login-bg.avif')" }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/90 via-ink/80 to-ink" />
+    <div className="w-full">
+      {banner && (
+        <Banner tone={banner.tone} onClose={() => setBanner(null)}>
+          {banner.text}
+        </Banner>
+      )}
 
-      {/* Conteúdo Relativo sobre o Fundo */}
-      <div className="relative z-10 max-w-6xl mx-auto">
-        {banner && (
-          <Banner tone={banner.tone} onClose={() => setBanner(null)}>
-            {banner.text}
-          </Banner>
-        )}
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="rounded-xl p-6 bg-ink2/80 backdrop-blur-md border border-white/5">
+          <Eyebrow>Novo Evento</Eyebrow>
+          <h2 className="text-xl mb-5 font-display font-semibold text-slate-100">Cadastrar evento</h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="rounded-xl p-6 bg-ink2/80 backdrop-blur-md border border-white/5">
-            <Eyebrow>Novo Evento</Eyebrow>
-            <h2 className="text-xl mb-5 font-display font-semibold text-slate-100">Cadastrar evento</h2>
-
-            <form onSubmit={handleCreateEvent}>
-              <Field label="Título">
+          <form onSubmit={handleCreateEvent}>
+            <Field label="Título">
+              <TextInput
+                required
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Show de Rock"
+              />
+            </Field>
+            <Field label="Local">
+              <TextInput
+                required
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="Arena SP"
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Data">
                 <TextInput
+                  type="date"
                   required
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Show de Rock"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
                 />
               </Field>
-              <Field label="Local">
+              <Field label="Preço (R$)">
                 <TextInput
+                  type="number"
+                  step="0.01"
                   required
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  placeholder="Arena SP"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="150.00"
                 />
               </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Data">
-                  <TextInput
-                    type="date"
-                    required
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  />
-                </Field>
-                <Field label="Preço (R$)">
-                  <TextInput
-                    type="number"
-                    step="0.01"
-                    required
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    placeholder="150.00"
-                  />
-                </Field>
-              </div>
-              <Button type="submit" loading={busy} className="w-full mt-2">
-                Publicar evento
+            </div>
+            <Button type="submit" loading={busy} className="w-full mt-2">
+              Publicar evento
+            </Button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-inkline">
+            <Eyebrow>Referência (opcional)</Eyebrow>
+            <p className="text-xs mb-3 text-muted">Buscar um filme no TMDb para inspirar o título do evento.</p>
+            <form onSubmit={handleSearchMovies} className="flex gap-2 mb-3">
+              <TextInput
+                value={movieQuery}
+                onChange={(e) => setMovieQuery(e.target.value)}
+                placeholder="Ex: Matrix"
+                className="flex-1"
+              />
+              <Button type="submit" variant="ghost" loading={busy}>
+                <Film className="w-4 h-4" />
               </Button>
             </form>
-
-            <div className="mt-8 pt-6 border-t border-inkline">
-              <Eyebrow>Referência (opcional)</Eyebrow>
-              <p className="text-xs mb-3 text-muted">Buscar um filme no TMDb para inspirar o título do evento.</p>
-              <form onSubmit={handleSearchMovies} className="flex gap-2 mb-3">
-                <TextInput
-                  value={movieQuery}
-                  onChange={(e) => setMovieQuery(e.target.value)}
-                  placeholder="Ex: Matrix"
-                  className="flex-1"
-                />
-                <Button type="submit" variant="ghost" loading={busy}>
-                  <Film className="w-4 h-4" />
-                </Button>
-              </form>
-              <div className="space-y-1.5">
-                {movieResults.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setForm({ ...form, title: m.title })}
-                    className="w-full text-left text-xs px-3 py-2 rounded-md flex justify-between items-center bg-ink3/80 text-mutedlight hover:border-brass border border-transparent"
-                  >
-                    <span>{m.title}</span>
-                    <span className="opacity-50">{m.release_date?.slice(0, 4)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Eyebrow>Eventos publicados nesta sessão</Eyebrow>
-            <div className="space-y-3">
-              {events.length === 0 && (
-                <div className="text-sm rounded-md p-4 bg-ink3/80 backdrop-blur-md text-muted border border-white/5">
-                  Nenhum evento criado ainda.
-                </div>
-              )}
-              {events.map((ev) => (
-                <div key={ev.id} className="rounded-md p-4 flex justify-between items-start bg-ink2/80 backdrop-blur-md border border-inkline">
-                  <div>
-                    <div className="text-sm font-semibold text-slate-100">{ev.title}</div>
-                    <div className="text-xs mt-1 flex items-center gap-1 text-muted">
-                      <MapPin className="w-3 h-3" /> {ev.location} · {ev.date}
-                    </div>
-                    <div className="text-xs mt-1 flex items-center gap-1 text-muted">
-                      <CircleDollarSign className="w-3 h-3" /> R$ {Number(ev.price).toFixed(2)}
-                    </div>
-                  </div>
-                  <span className="text-[10px] px-2 py-1 rounded-full bg-ink3 text-brass font-mono">ID {ev.id}</span>
-                </div>
+            <div className="space-y-1.5">
+              {movieResults.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setForm({ ...form, title: m.title })}
+                  className="w-full text-left text-xs px-3 py-2 rounded-md flex justify-between items-center bg-ink3/80 text-mutedlight hover:border-brass border border-transparent"
+                >
+                  <span>{m.title}</span>
+                  <span className="opacity-50">{m.release_date?.slice(0, 4)}</span>
+                </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div>
+          <Eyebrow>Eventos publicados nesta sessão</Eyebrow>
+          <div className="space-y-3">
+            {events.length === 0 && (
+              <div className="text-sm rounded-md p-4 bg-ink3/80 backdrop-blur-md text-muted border border-white/5">
+                Nenhum evento criado ainda.
+              </div>
+            )}
+            {events.map((ev) => (
+              <div key={ev.id} className="rounded-md p-4 flex justify-between items-start bg-ink2/80 backdrop-blur-md border border-inkline">
+                <div>
+                  <div className="text-sm font-semibold text-slate-100">{ev.title}</div>
+                  <div className="text-xs mt-1 flex items-center gap-1 text-muted">
+                    <MapPin className="w-3 h-3" /> {ev.location} · {ev.date}
+                  </div>
+                  <div className="text-xs mt-1 flex items-center gap-1 text-muted">
+                    <CircleDollarSign className="w-3 h-3" /> R$ {Number(ev.price).toFixed(2)}
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-1 rounded-full bg-ink3 text-brass font-mono">ID {ev.id}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
