@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Copy, Armchair, Users } from "lucide-react";
+import { Copy, Armchair, Users, Ticket as TicketIcon, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api.js";
 import { Eyebrow, Field, TextInput, Button, Banner } from "../components/ui.jsx";
@@ -11,10 +11,11 @@ const SEATS_PER_ROW = 8;
 export default function ClientPage() {
   const { user } = useAuth();
 
-  // Controle de abas: 'reserve' ou 'lookup'
+  // Controle de abas: 'reserve' | 'mine' | 'lookup'
   const [activeTab, setActiveTab] = useState("reserve");
 
-  // Estado dos eventos cadastrados
+  // Estado dos eventos cadastrados (usado no formulário de reserva e para
+  // enriquecer "Meus Ingressos" com título/local do evento)
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
@@ -30,6 +31,10 @@ export default function ClientPage() {
 
   // Ingressos gerados na última reserva (pode ser mais de um)
   const [tickets, setTickets] = useState([]);
+
+  // Meus ingressos (histórico completo do cliente)
+  const [myTickets, setMyTickets] = useState([]);
+  const [loadingMyTickets, setLoadingMyTickets] = useState(true);
 
   // Estado da busca/consulta por link ou token
   const [searchToken, setSearchToken] = useState("");
@@ -54,7 +59,26 @@ export default function ClientPage() {
     }
 
     loadEvents();
+    loadMyTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  async function loadMyTickets() {
+    setLoadingMyTickets(true);
+    try {
+      const data = await api.myTickets(user.token);
+      setMyTickets(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setBanner({ tone: "error", text: "Não foi possível carregar seus ingressos." });
+    } finally {
+      setLoadingMyTickets(false);
+    }
+  }
+
+  function eventLabel(eventId) {
+    const ev = events.find((e) => e.id === eventId);
+    return ev ? `${ev.title} — ${ev.location}` : `Evento #${eventId}`;
+  }
 
   function toggleSeat(seatLabel) {
     setSelectedSeats((prev) =>
@@ -89,8 +113,6 @@ export default function ClientPage() {
     const successful = [];
     const failed = [];
 
-    // Reserva um por um (o backend cria um ingresso por chamada) — assim
-    // conseguimos reportar exatamente quais assentos deram certo ou não.
     for (const seat of seatsToBook) {
       try {
         const data = await api.bookTicket(user.token, {
@@ -108,15 +130,9 @@ export default function ClientPage() {
     setSelectedSeats([]);
 
     if (failed.length === 0) {
-      setBanner({
-        tone: "ok",
-        text: `${successful.length} ingresso(s) reservado(s) com sucesso!`,
-      });
+      setBanner({ tone: "ok", text: `${successful.length} ingresso(s) reservado(s) com sucesso!` });
     } else if (successful.length === 0) {
-      setBanner({
-        tone: "error",
-        text: `Nenhuma reserva concluída. ${failed[0].message}`,
-      });
+      setBanner({ tone: "error", text: `Nenhuma reserva concluída. ${failed[0].message}` });
     } else {
       setBanner({
         tone: "error",
@@ -125,6 +141,11 @@ export default function ClientPage() {
     }
 
     setBusy(false);
+
+    // Atualiza "Meus Ingressos" com o(s) novo(s) ingresso(s)
+    if (successful.length > 0) {
+      loadMyTickets();
+    }
   }
 
   async function fetchSharedTicket(tokenToFetch) {
@@ -157,7 +178,7 @@ export default function ClientPage() {
       )}
 
       {/* Navegação de Abas Superior */}
-      <div className="flex gap-2 justify-center mb-8">
+      <div className="flex gap-2 justify-center mb-8 flex-wrap">
         <button
           onClick={() => setActiveTab("reserve")}
           className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
@@ -167,6 +188,16 @@ export default function ClientPage() {
           }`}
         >
           🎟️ Reservar Ingresso
+        </button>
+        <button
+          onClick={() => setActiveTab("mine")}
+          className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+            activeTab === "mine"
+              ? "bg-brass text-[#181008] font-semibold"
+              : "bg-ink2/80 text-muted hover:text-slate-100 border border-white/5"
+          }`}
+        >
+          🎫 Meus Ingressos {myTickets.length > 0 && `(${myTickets.length})`}
         </button>
         <button
           onClick={() => setActiveTab("lookup")}
@@ -210,7 +241,6 @@ export default function ClientPage() {
                 </select>
               </Field>
 
-              {/* Alternância: mapa de assentos ou quantidade (pista) */}
               <div className="flex gap-2 mb-4">
                 <button
                   type="button"
@@ -279,7 +309,8 @@ export default function ClientPage() {
                       : `Selecionados: ${selectedSeats.join(", ")}`}
                   </p>
                   <p className="text-[10px] text-muted mt-1">
-                    Caso algum lugar esteja ocupado, aparecerá erro ao confirmar.
+                    O mapa não sabe quais assentos já foram vendidos — se algum
+                    já estiver ocupado, o erro aparece só ao confirmar.
                   </p>
                 </div>
               ) : (
@@ -344,7 +375,51 @@ export default function ClientPage() {
         </div>
       )}
 
-      {/* ABA 2: CONSULTAR INGRESSO PELO LINK */}
+      {/* ABA 2: MEUS INGRESSOS */}
+      {activeTab === "mine" && (
+        <div className="max-w-3xl mx-auto">
+          <Eyebrow>HISTÓRICO</Eyebrow>
+          <h2 className="text-2xl mb-6 font-display font-semibold text-slate-100">Meus ingressos</h2>
+
+          {loadingMyTickets ? (
+            <div className="text-center py-12 text-sm text-muted">Carregando seus ingressos...</div>
+          ) : myTickets.length === 0 ? (
+            <div className="text-center py-12 rounded-xl bg-ink2/80 border border-white/5 text-sm text-muted flex flex-col items-center gap-2">
+              <TicketIcon className="w-8 h-8 opacity-40" />
+              Você ainda não reservou nenhum ingresso.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {myTickets.map((t) => (
+                <div key={t.id} className="bg-ink2/80 backdrop-blur-md p-4 rounded-xl border border-white/5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-slate-100">{eventLabel(t.event_id)}</span>
+                    {t.is_validated ? (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-stampgreen/20 text-stampgreen font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Já validado
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-brass/20 text-brass font-semibold">
+                        Válido
+                      </span>
+                    )}
+                  </div>
+                  <TicketStub
+                    title={`Assento ${t.seat_number}`}
+                    rows={[["Ticket", `#${t.id}`]]}
+                    code={t.signature}
+                  />
+                  <div className="mt-3 text-xs text-muted">
+                    Link compartilhável: <span className="font-mono">/tickets/share/{t.share_token}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ABA 3: CONSULTAR INGRESSO PELO LINK */}
       {activeTab === "lookup" && (
         <div className="max-w-2xl mx-auto">
           <Eyebrow>CONSULTA PÚBLICA</Eyebrow>

@@ -62,6 +62,8 @@ export const api = {
   bookTicket: (token, booking) =>
     request("/bookings", { method: "POST", token, json: booking }),
 
+  myTickets: (token) => request("/bookings/me", { token }),
+
   sharedTicket: (token) => request(`/tickets/share/${token}`),
 
   validateGate: (token, qrPayload, gateEventId) =>
